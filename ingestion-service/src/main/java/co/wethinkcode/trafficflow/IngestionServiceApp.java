@@ -12,5 +12,8 @@ public class IngestionServiceApp {
         // TODO: read and clean src/main/resources/intersections-legacy.csv (intersections, districts, signal types data —
         // trim whitespace, fix casing, normalize dates/booleans) and expose the
         // cleaned records here for the other services to consume.
+        app.get("/intersections", ctx ->
+                ctx.json(IntersectionDataCleaner.loadAndClean("intersections-legacy.csv"))
+        );
     }
 }

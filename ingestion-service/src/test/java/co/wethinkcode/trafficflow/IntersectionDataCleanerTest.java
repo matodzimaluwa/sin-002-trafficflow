@@ -7,6 +7,7 @@ import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNull;
 
 class IntersectionDataCleanerTest {
 
@@ -67,5 +68,25 @@ class IntersectionDataCleanerTest {
                 .count();
 
         assertEquals(1, duplicateCount);
+    }
+    @Test
+    void normalizesDistrictCasing() {
+        List<IntersectionRecord> intersections =
+                IntersectionDataCleaner.loadAndClean("intersections-legacy.csv");
+
+        assertEquals("Downtown", intersections.get(2).district());
+        assertEquals("Uptown", intersections.get(7).district());
+        assertEquals("Midtown", intersections.get(10).district());
+    }
+
+    @Test
+    void convertsMissingAndPlaceholderValuesToNull() {
+        List<IntersectionRecord> intersections =
+                IntersectionDataCleaner.loadAndClean("intersections-legacy.csv");
+
+        assertNull(intersections.get(3).signalType());
+        assertNull(intersections.get(6).signalType());
+        assertNull(intersections.get(12).signalType());
+        assertNull(intersections.get(14).district());
     }
 }

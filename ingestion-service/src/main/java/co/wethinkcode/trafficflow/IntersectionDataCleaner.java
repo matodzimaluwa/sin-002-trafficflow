@@ -34,8 +34,12 @@ public class IntersectionDataCleaner {
 
                     // Clean whitespace and standardize the intersection ID.
                     String id = row[0].trim().toUpperCase();
-                    String district = row[1].trim();
-                    String signalType = row[2].trim().toLowerCase();
+                    String district = normalizeDistrict(row[1]);
+                    String signalType = cleanValue(row[2]);
+
+                    if (signalType != null) {
+                        signalType = signalType.toLowerCase();
+                    }
 
                     // Convert different boolean values into true or false.
                     String activeValue = row[3].trim();
@@ -59,5 +63,37 @@ public class IntersectionDataCleaner {
 
         // Return the cleaned records in their original order.
         return new ArrayList<>(intersections.values());
+    }
+    private static String cleanValue(String value) {
+        String cleaned = value.trim().replaceAll("\\s+", " ");
+
+        if (cleaned.isEmpty()
+                || cleaned.matches("(?i)N/A|TBD|unknown|-|NaN")) {
+            return null;
+        }
+
+        return cleaned;
+    }
+
+    private static String normalizeDistrict(String value) {
+        String cleaned = cleanValue(value);
+
+        if (cleaned == null) {
+            return null;
+        }
+
+        String[] words = cleaned.toLowerCase().split(" ");
+        StringBuilder district = new StringBuilder();
+
+        for (String word : words) {
+            if (district.length() > 0) {
+                district.append(" ");
+            }
+
+            district.append(Character.toUpperCase(word.charAt(0)));
+            district.append(word.substring(1));
+        }
+
+        return district.toString();
     }
 }

@@ -1,6 +1,13 @@
 package co.wethinkcode.trafficflow;
 
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
 import io.javalin.Javalin;
+
+import java.net.URI;
+import java.net.http.HttpClient;
+import java.net.http.HttpRequest;
+import java.net.http.HttpResponse;
 
 public class RoutingServiceApp {
 
@@ -11,6 +18,59 @@ public class RoutingServiceApp {
 
         // TODO (Provides estimated travel times based on congestion and intersection.)
         // Add domain endpoints for routing-service here.
+        app.get("/route/{id}", ctx -> {
+            String id = ctx.pathParam("id");
+            HttpClient client = HttpClient.newHttpClient();
+
+            HttpRequest intersectionRequest = HttpRequest.newBuilder()
+                    .uri(URI.create("http://localhost:7021/intersections/" + id))
+                    .GET()
+                    .build();
+
+            HttpResponse<String> intersectionResponse = client.send(
+                    intersectionRequest,
+                    HttpResponse.BodyHandlers.ofString()
+            );
+
+            if (intersectionResponse.statusCode() != 200) {
+                ctx.status(intersectionResponse.statusCode())
+                        .result("Intersection not found");
+                return;
+            }
+
+            HttpRequest congestionRequest = HttpRequest.newBuilder()
+                    .uri(URI.create("http://localhost:7022/congestion"))
+                    .GET()
+                    .build();
+
+            HttpResponse<String> congestionResponse = client.send(
+                    congestionRequest,
+                    HttpResponse.BodyHandlers.ofString()
+            );
+
+            if (congestionResponse.statusCode() != 200) {
+                ctx.status(502).result("Congestion service unavailable");
+                return;
+            }
+
+            JsonObject intersection = JsonParser.parseString(
+                    intersectionResponse.body()
+            ).getAsJsonObject();
+
+            JsonObject congestion = JsonParser.parseString(
+                    congestionResponse.body()
+            ).getAsJsonObject();
+
+            int level = congestion.get("level").getAsInt();
+            int estimatedTravelTime = 5 + (level * 2);
+
+            JsonObject result = new JsonObject();
+            result.add("intersection", intersection);
+            result.addProperty("congestionLevel", level);
+            result.addProperty("estimatedTravelTimeMinutes", estimatedTravelTime);
+
+            ctx.contentType("application/json").result(result.toString());
+        });
     }
 }
 

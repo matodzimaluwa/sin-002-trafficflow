@@ -14,10 +14,13 @@ MQ: this service publishes to the ActiveMQ topic `congestion-topic` — see [`..
 ```
 congestion-service/
 ├── pom.xml
-└── src/main/java/co/wethinkcode/trafficflow/
-    ├── CongestionServiceApp.java
-    └── mq/
-        └── MqConfig.java
+└── src/
+    ├── main/java/co/wethinkcode/trafficflow/
+    │   ├── CongestionServiceApp.java
+    │   └── mq/
+    │       └── MqConfig.java
+    └── test/java/co/wethinkcode/trafficflow/
+        └── CongestionServiceTest.java
 ```
 
 ## Build
@@ -34,13 +37,16 @@ java -jar target/congestion-service.jar
 
 Listens on port `7022`.
 
+## Endpoints
+
+- `GET /health` returns `OK`
+- `GET /congestion` returns `{"level": n}`. The level starts at 0 and is kept in memory.
+- `PUT /congestion?level=n` sets the level and returns it. Returns `400` if the level is missing, not a number, or outside 0-8.
+
 ## Test
 
-No automated tests yet. Manually verify it's up:
+Run the unit tests with `mvn test`. To manually verify it's up:
 
 ```
 curl http://localhost:7022/health   # -> OK
 ```
-
-To add real tests, add JUnit 5 + the Surefire plugin to `pom.xml`, put tests under
-`src/test/java/co/wethinkcode/trafficflow/`, and run `mvn test`.

@@ -8,6 +8,7 @@ import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
+import java.io.IOException;
 
 public class RoutingServiceApp {
 
@@ -15,6 +16,9 @@ public class RoutingServiceApp {
         Javalin app = Javalin.create().start(7023);
 
         app.get("/health", ctx -> ctx.result("OK"));
+
+        app.exception(IOException.class, (e, ctx) ->
+                ctx.status(503).result("A required service is unreachable"));
 
         // TODO (Provides estimated travel times based on congestion and intersection.)
         // Add domain endpoints for routing-service here.
@@ -32,9 +36,12 @@ public class RoutingServiceApp {
                     HttpResponse.BodyHandlers.ofString()
             );
 
+            if (intersectionResponse.statusCode() == 404) {
+                ctx.status(404).result("Intersection not found");
+                return;
+            }
             if (intersectionResponse.statusCode() != 200) {
-                ctx.status(intersectionResponse.statusCode())
-                        .result("Intersection not found");
+                ctx.status(502).result("Intersection service unavailable");
                 return;
             }
 

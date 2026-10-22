@@ -89,4 +89,12 @@ class IntersectionDataCleanerTest {
         assertNull(intersections.get(12).signalType());
         assertNull(intersections.get(14).district());
     }
+    @Test
+    void convertsUnknownActiveFlagToNull() {
+        List<IntersectionRecord> intersections =
+                IntersectionDataCleaner.loadAndClean("intersections-legacy.csv");
+
+        // INT-1013 has "unknown" as its active flag.
+        assertNull(intersections.get(12).active());
+    }
 }

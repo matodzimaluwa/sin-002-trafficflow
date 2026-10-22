@@ -34,6 +34,14 @@ java -jar target/intersection-service.jar
 
 Listens on port `7021`.
 
+## Endpoints
+
+- `GET /health` returns `OK`
+- `GET /intersections/{id}` returns the intersection as JSON (case-insensitive id), or `404` if it isn't known
+- `GET /districts/{name}` returns `{"district": "...", "intersections": [...]}` (case-insensitive name), or `404` if no intersection belongs to that district
+
+The intersection list comes from ingestion-service (port 7020) on the first request and is then cached in memory. If ingestion can't be reached, these endpoints return `503`. The cache never refreshes, so restart this service to pick up new data.
+
 ## Test
 
 No automated tests yet. Manually verify it's up:

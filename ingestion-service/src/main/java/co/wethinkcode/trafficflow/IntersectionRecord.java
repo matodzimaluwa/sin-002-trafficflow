@@ -5,6 +5,6 @@ public record IntersectionRecord(
         String id,
         String district,
         String signalType,
-        boolean active
+        Boolean active
 ) {
 }

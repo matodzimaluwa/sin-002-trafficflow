@@ -11,12 +11,10 @@ public class CongestionServiceApp {
         Javalin app = Javalin.create(config -> config.jsonMapper(new JavalinGson())).start(7022);
         app.get("/health", ctx -> ctx.result("OK"));
 
-        // TODO (Tracks the city-wide Congestion Level (0-8).)
         // Add domain endpoints for congestion-service here.
         app.get("/congestion", ctx -> {
             ctx.json(java.util.Map.of("level", congestionLevel));
         });
-
 
         app.put("/congestion", ctx -> {
             String value = ctx.queryParam("level");
@@ -35,7 +33,7 @@ public class CongestionServiceApp {
                 return;
             }
 
-            if (level < 0 || level > 8) {
+            if (!isValidLevel(level)) {
                 ctx.status(400).result("Congestion level must be between 0 and 8");
                 return;
             }
@@ -43,6 +41,10 @@ public class CongestionServiceApp {
             congestionLevel = level;
             ctx.json(java.util.Map.of("level", congestionLevel));
         });
+    }
+
+    static boolean isValidLevel(int level) {
+        return level >= 0 && level <= 8;
     }
 }
 

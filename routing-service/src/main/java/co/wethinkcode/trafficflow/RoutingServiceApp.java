@@ -57,8 +57,7 @@ public class RoutingServiceApp {
             int level = JsonParser.parseString(congestionResponse.body())
                     .getAsJsonObject().get("level").getAsInt();
 
-            // Base of 5 minutes, plus 2 more minutes for every congestion level (0-8).
-            int estimatedTravelTime = 5 + (level * 2);
+            int estimatedTravelTime = estimateTravelTime(level);
 
             JsonObject result = new JsonObject();
             result.add("from", fromIntersection);
@@ -68,6 +67,10 @@ public class RoutingServiceApp {
 
             ctx.contentType("application/json").result(result.toString());
         });
+    }
+
+    static int estimateTravelTime(int congestionLevel) {
+        return 5 + (congestionLevel * 2);
     }
 
     // null means ctx already has the 404/502

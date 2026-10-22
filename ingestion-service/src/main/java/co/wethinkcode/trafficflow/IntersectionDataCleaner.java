@@ -40,13 +40,9 @@ public class IntersectionDataCleaner {
                     if (signalType != null) {
                         signalType = signalType.toLowerCase();
                     }
+                    Boolean active = parseActive(row[3]);
 
-                    // Convert different boolean values into true or false.
-                    String activeValue = row[3].trim();
-                    boolean active = activeValue.equalsIgnoreCase("Y")
-                            || activeValue.equalsIgnoreCase("YES")
-                            || activeValue.equalsIgnoreCase("TRUE")
-                            || activeValue.equals("1");
+
 
                     IntersectionRecord intersection = new IntersectionRecord(
                             id, district, signalType, active
@@ -64,7 +60,7 @@ public class IntersectionDataCleaner {
         // Return the cleaned records in their original order.
         return new ArrayList<>(intersections.values());
     }
-    private static String cleanValue(String value) {
+    private static String  cleanValue(String value) {
         String cleaned = value.trim().replaceAll("\\s+", " ");
 
         if (cleaned.isEmpty()
@@ -96,4 +92,19 @@ public class IntersectionDataCleaner {
 
         return district.toString();
     }
+    private static Boolean parseActive(String value) {
+        String cleaned = cleanValue(value);
+
+        if (cleaned == null) {
+            return null;
+        }
+        if (cleaned.matches("(?i)y|yes|true|1")) {
+            return true;
+        }
+        if (cleaned.matches("(?i)n|no|false|0")) {
+            return false;
+        }
+        return null; // unrecognised value: keep it explicitly missing, don't guess
+    }
 }
+

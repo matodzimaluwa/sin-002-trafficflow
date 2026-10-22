@@ -14,10 +14,13 @@ MQ: this service subscribes to the ActiveMQ topic `congestion-topic` — see [`.
 ```
 routing-service/
 ├── pom.xml
-└── src/main/java/co/wethinkcode/trafficflow/
-    ├── RoutingServiceApp.java
-    └── mq/
-        └── MqConfig.java
+└── src/
+    ├── main/java/co/wethinkcode/trafficflow/
+    │   ├── RoutingServiceApp.java
+    │   └── mq/
+    │       └── MqConfig.java
+    └── test/java/co/wethinkcode/trafficflow/
+        └── RoutingServiceTest.java
 ```
 
 ## Build
@@ -34,13 +37,24 @@ java -jar target/routing-service.jar
 
 Listens on port `7023`.
 
+## Endpoints
+
+- `GET /health` returns `OK`
+- `GET /route?from=INT-1001&to=INT-1002` checks both intersections with intersection-service (port 7021), reads the congestion level from congestion-service (port 7022), and returns both intersections, the `congestionLevel` and `estimatedTravelTimeMinutes`.
+
+Travel time is 5 minutes plus 2 minutes per congestion level.
+
+Errors:
+
+- `400` if `from` or `to` is missing
+- `404` if either intersection is unknown
+- `502` if a service answers with an error
+- `503` if a service can't be reached
+
 ## Test
 
-No automated tests yet. Manually verify it's up:
+Run the unit tests with `mvn test`. To manually verify it's up:
 
 ```
 curl http://localhost:7023/health   # -> OK
 ```
-
-To add real tests, add JUnit 5 + the Surefire plugin to `pom.xml`, put tests under
-`src/test/java/co/wethinkcode/trafficflow/`, and run `mvn test`.

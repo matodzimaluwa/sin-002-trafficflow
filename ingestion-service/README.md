@@ -71,9 +71,16 @@ What happened:
 ```
 ingestion-service/
 ├── pom.xml
-└── src/main/
-    ├── java/co/wethinkcode/trafficflow/IngestionServiceApp.java
-    └── resources/intersections-legacy.csv
+└── src/
+    ├── main/
+    │   ├── java/co/wethinkcode/trafficflow/
+    │   │   ├── IngestionServiceApp.java
+    │   │   ├── IntersectionDataCleaner.java
+    │   │   └── IntersectionRecord.java
+    │   └── resources/intersections-legacy.csv
+    └── test/java/co/wethinkcode/trafficflow/
+        ├── IntersectionDataCleanerTest.java
+        └── IntersectionRecordTest.java
 ```
 
 ## Build
@@ -88,16 +95,12 @@ mvn package
 java -jar target/ingestion-service.jar
 ```
 
-Listens on port `7020`. Currently just exposes `/health` — the actual CSV
-parsing/cleaning logic is a TODO.
+Listens on port `7020`. Exposes `/health` and `GET /intersections`, which returns the cleaned records as JSON. Missing or unrecognised values (including the active flag) come back as `null`.
 
 ## Test
 
-No automated tests yet. Manually verify it's up:
+Run the unit tests with `mvn test`. To manually verify it's up:
 
 ```
 curl http://localhost:7020/health   # -> OK
 ```
-
-To add real tests, add JUnit 5 + the Surefire plugin to `pom.xml`, put tests under
-`src/test/java/co/wethinkcode/trafficflow/`, and run `mvn test`.
